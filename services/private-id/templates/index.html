@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParishOS - Fast Entry</title>
+    <link rel="stylesheet" href="https://jsdelivr.net">
+    <style>
+        :root { --pico-spacing: 0.75rem; } /* Tighten spacing for high-density mobile views */
+        body { padding: 10px 0; }
+        .grid { margin-bottom: 0; }
+        label { margin-bottom: 2px; font-weight: bold; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h2 style="margin-bottom: 0;">☦️ Quick Parishioner Entry</h2>
+        </header>
+
+        <section id="form-section">
+            <form action="/api/add-parishioner" method="POST">
+                
+                <!-- Section 1: Core Names -->
+                <div class="grid">
+                    <div>
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="John (or leave blank if Unborn)">
+                    </div>
+                    <div>
+                        <label for="last_name">Last Name *</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="Papadopoulos" required>
+                    </div>
+                </div>
+
+                <!-- Section 2: Traditional Demographics -->
+                <div class="grid">
+                    <div>
+                        <label for="liturgical_name">Liturgical/Saint Name</label>
+                        <input type="text" id="liturgical_name" name="liturgical_name" placeholder="Spyridon">
+                    </div>
+                    <div>
+                        <label for="patron_saint_id">Patron Saint</label>
+                        <select id="patron_saint_id" name="patron_saint_id">
+                            <option value="">-- Select Saint --</option>
+                            <option value="st-john-bap">St. John the Baptist</option>
+                            <option value="st-nicholas">St. Nicholas</option>
+                            <option value="st-spyridon">St. Spyridon</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 3: Orthodox Status Matrix -->
+                <div class="grid">
+                    <div>
+                        <label for="spiritual_status">Spiritual Status</label>
+                        <select id="spiritual_status" name="spiritual_status" required>
+                            <option value="Baptized">Baptized / Chrismated</option>
+                            <option value="Catechumen">Catechumen</option>
+                            <option value="Active Inquirer">Active Inquirer</option>
+                            <option value="Inconsistent Inquirer">Inconsistent Inquirer</option>
+                            <option value="Guest">Guest</option>
+                            <option value="Lapsed">Lapsed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="regularity">Regularity</label>
+                        <select id="regularity" name="regularity" required>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Seasonally">Seasonally</option>
+                            <option value="Annually">Annually</option>
+                            <option value="Irregularly">Irregularly</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 4: Lifecycle Toggles -->
+                <div class="grid">
+                    <div>
+                        <label for="development_stage">Development Stage</label>
+                        <select id="development_stage" name="development_stage" required>
+                            <option value="Adult">Adult</option>
+                            <option value="Child">Child</option>
+                            <option value="Unborn">Unborn (Baby)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 5: Essential Contact Inputs -->
+                <div class="grid">
+                    <div>
+                        <label for="personal_phone">Mobile Phone</label>
+                        <input type="tel" id="personal_phone" name="personal_phone" placeholder="509-555-0199">
+                    </div>
+                    <div>
+                        <label for="personal_email">Email Address</label>
+                        <input type="email" id="personal_email" name="personal_email" placeholder="name@domain.com">
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div>
+                        <label for="languages_spoken">Languages Spoken</label>
+                        <input type="text" id="languages_spoken" name="languages_spoken" value="English">
+                    </div>
+                    <div>
+                        <label for="job_title">Job Title / Skill</label>
+                        <input type="text" id="job_title" name="job_title" placeholder="Electrician, Teacher, etc.">
+                    </div>
+                </div>
+
+                <!-- Primary Speed Action -->
+                <button type="submit" class="contrast" style="margin-top: 15px;">💾 Save & Next Entry</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
