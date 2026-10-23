@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  private-id-service:
+    build:
+      context: ../../services/private-id-service
+      dockerfile: Dockerfile
+    container_name: parish_os_id_core
+    ports:
+      - "80:8080"
+    environment:
+      - DATABASE_PATH=/data/parish_core.db
+    volumes:
+      - id_data:/data
+    restart: always
+
+volumes:
+  id_data:
