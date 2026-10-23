@@ -70,11 +70,35 @@ def add_parishioner():
     return redirect('/')
 
 if __name__ == '__main__':
-    # Initialize mock structural lookup keys for development safety if needed
+    # 1. Ensure the SQLite database file exists and is structurally sound on startup
+    # DB_PATH will point to /data/parish_core.db inside the container
+    print(f"Checking database health at: {DB_PATH}")
+    
+    # Ensure the parent directory exists inside the container
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    
     conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("INSERT OR IGNORE INTO parishes (id, name, city, jurisdiction) VALUES ('test-parish-uuid', 'Sandbox Parish', 'Spokane', 'Antiochian');")
+    cursor = conn.cursor()
+    
+    # 2. Read the master schema file that we bundle into the container
+    schema_path = os.path.join(os.path.dirname(__file__), 'base_schema.sql')
+    if os.path.exists(schema_path):
+        with open(schema_path, 'r') as f:
+            cursor.executescript(f.read())
+        print("Schema successfully verified/applied.")
+    else:
+        print("⚠️ Warning: base_schema.sql not found in service directory!")
+
+    # 3. Seed default sandbox configurations so your weekend app doesn't crash
+    cursor.execute("INSERT OR IGNORE INTO parishes (id, name, city, jurisdiction) VALUES ('test-parish-uuid', 'Sandbox Parish', 'Spokane', 'Antiochian');")
+    cursor.execute("INSERT OR IGNORE INTO saints (id, official_name, common_name, feast_day_date) VALUES ('st-john-bap', 'St. John the Baptist', 'St. John the Baptist', '01-07'), ('st-nicholas', 'St. Nicholas', 'St. Nicholas', '12-06'), ('st-spyridon', 'St. Spyridon', 'St. Spyridon', '12-12');")
+    
     conn.commit()
     conn.close()
+    print("✨ Database integration check complete. Booting application server...")
+    
+    # 4. Fire up the web application
+    app.run(host='0.0.0.0', port=8080, debug=True)
+
     
     app.run(host='0.0.0.0', port=8080, debug=True)
