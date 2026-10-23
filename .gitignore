@@ -1,0 +1,22 @@
+# Python bytecode caching binaries
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Local active SQLite runtime files (Keeps production data out of git)
+*.db
+*.db-journal
+*.db-wal
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# OS specific administration clutter
+.DS_Store
+Thumbs.db
+
+# Docker application build footprints
+.docker/
