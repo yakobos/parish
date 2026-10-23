@@ -3,7 +3,7 @@ version: '3.8'
 services:
   private-id-service:
     build:
-      context: ../../services/private-id-service
+      context: ../../services/private-id
       dockerfile: Dockerfile
     container_name: parish_os_id_core
     ports:
