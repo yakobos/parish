@@ -1,5 +1,5 @@
 # 1. Jump directly into your identity microservice directory
-cd services/private-id-service
+cd services/private-id
 
 # 2. Build your local SQLite tracking database from your master schema script
 python3 -c "
