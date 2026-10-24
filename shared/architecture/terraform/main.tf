@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-2" # Oregon region (Closest to Spokane for sub-15ms latency)
+  region = "us-east-2"
 }
 
 # 1. Custom Isolated Network (VPC)
@@ -31,7 +31,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.parish_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true # Automatically assigns a public IP to our instance
 
   tags = { Name = "parishos-public-subnet" }
@@ -109,7 +109,7 @@ resource "aws_key_pair" "deployer_key" {
 # 7. The $4.50/mo Graviton EC2 Engine
 resource "aws_instance" "parish_server" {
   ami           = data.aws_ami.ubuntu_arm.id
-  instance_type = "t4g.nano" # 2 vCPUs, 0.5GB RAM - Blazing fast for native C-level SQLite execution
+  instance_type = "t4g.small" # 2 vCPUs, 0.5GB RAM - Blazing fast for native C-level SQLite execution
   
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.vps_sg.id]
@@ -119,7 +119,7 @@ resource "aws_instance" "parish_server" {
   user_data = <<-EOF
               #!/bin/bash
               apt-get update -y
-              apt-get install -y docker.io git
+              apt-get install -y docker.io git docker-compose
               systemctl start docker
               systemctl enable docker
               
@@ -134,6 +134,18 @@ resource "aws_instance" "parish_server" {
               # Construct isolated runtime project directory
               mkdir -p /home/ubuntu/parish-os
               chown -R ubuntu:ubuntu /home/ubuntu/parish-os
+
+              # 5. Clone the application repository directly into the workspace
+              # Using the dot '.' clones the contents directly inside parish-os instead of creating a subfolder
+              git clone https://github.com/yakobos/parish .
+              cd parish/shared/architecture
+
+              # 6. Secure workspace permissions back to the standard admin user
+              chown -R ubuntu:ubuntu /home/ubuntu/parish-os
+
+              # 7. Start the application container structure instantly
+              # Note: This executes your docker-compose config automatically on boot
+              docker compose up -d
               EOF
 
   root_block_device {
