@@ -118,34 +118,31 @@ resource "aws_instance" "parish_server" {
   # Automated Zero-Touch Bootstrapping
   user_data = <<-EOF
               #!/bin/bash
+              # 1. Core Engine installation
               apt-get update -y
-              apt-get install -y docker.io git docker-compose
+              apt-get install -y docker.io git curl docker-compose
               systemctl start docker
               systemctl enable docker
-              
-              # Allow standard ubuntu admin to query Docker without sudo
               usermod -aG docker ubuntu
-              
-              # Install Docker Compose Plugin natively
+
+              # 2. Native ARM64 Compose engine setup
               mkdir -p /usr/local/lib/docker/cli-plugins/
               curl -SL https://github.com -o /usr/local/lib/docker/cli-plugins/docker-compose
               chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-              
-              # Construct isolated runtime project directory
+
+              # 3. Securely isolate workspace and clean old data
+              rm -rf /home/ubuntu/parish-os
               mkdir -p /home/ubuntu/parish-os
+              cd /home/ubuntu/parish-os
+
+              # 4. Pull the public repository cleanly
+              git clone https://github.com .
+
+              # 5. Fix permissions across the workspace
               chown -R ubuntu:ubuntu /home/ubuntu/parish-os
 
-              # 5. Clone the application repository directly into the workspace
-              # Using the dot '.' clones the contents directly inside parish-os instead of creating a subfolder
-              git clone https://github.com/yakobos/parish .
-              cd parish/shared/architecture
-
-              # 6. Secure workspace permissions back to the standard admin user
-              chown -R ubuntu:ubuntu /home/ubuntu/parish-os
-
-              # 7. Start the application container structure instantly
-              # Note: This executes your docker-compose config automatically on boot
-              docker compose up -d
+              # 6. Run the master compose setup directly from the repository root
+              docker compose up -d --build
               EOF
 
   root_block_device {

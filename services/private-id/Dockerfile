@@ -1,15 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir flask==3.0.3
+# Paths are relative to the repository root now
+COPY services/private-id/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the microservice code
-COPY . .
+# Copy the specific service files into the container working directory
+COPY services/private-id/ .
 
-# Pull the master schema file from the shared directory into this container image
-COPY ../../shared/database/base_schema.sql ./base_schema.sql
-
-EXPOSE 8080
+# Cleanly pull the schema without any prohibited "../" syntax
+COPY shared/database/base_schema.sql ./base_schema.sql
 
 CMD ["python", "app.py"]
+
