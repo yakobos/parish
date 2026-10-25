@@ -119,7 +119,7 @@ resource "aws_instance" "parish_server" {
               #!/bin/bash
               # 1. Install container engines and version control systems
               apt-get update -y
-              apt-get install -y docker.io git curl
+              apt-get install -y docker.io docker-compose git curl
               systemctl start docker
               systemctl enable docker
               usermod -aG docker ubuntu
@@ -148,7 +148,9 @@ resource "aws_instance" "parish_server" {
               done
 
               # 7. Execute the build and run pipeline instantly once files exist
-              /usr/bin/docker compose -f /home/ubuntu/parish-os/docker-compose.yml up -d --build
+              /usr/bin/docker-compose -f /home/ubuntu/parish-os/docker-compose.yml build --no-cache
+              /usr/bin/docker-compose -f /home/ubuntu/parish-os/docker-compose.yml up -d
+
               EOF
   root_block_device {
     volume_size           = 8 # 8GB SSD is plenty for millions of rows in SQLite; stays under free-tier limits if applicable
