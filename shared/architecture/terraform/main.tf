@@ -115,36 +115,41 @@ resource "aws_instance" "parish_server" {
   vpc_security_group_ids = [aws_security_group.vps_sg.id]
   key_name               = aws_key_pair.deployer_key.key_name
 
-  # Automated Zero-Touch Bootstrapping
   user_data = <<-EOF
               #!/bin/bash
-              # 1. Core Engine installation
+              # 1. Install container engines and version control systems
               apt-get update -y
-              apt-get install -y docker.io git curl docker-compose
+              apt-get install -y docker.io git curl
               systemctl start docker
               systemctl enable docker
               usermod -aG docker ubuntu
 
-              # 2. Native ARM64 Compose engine setup
+              # 2. Native ARM64 Docker Compose engine installation
               mkdir -p /usr/local/lib/docker/cli-plugins/
               curl -SL https://github.com -o /usr/local/lib/docker/cli-plugins/docker-compose
               chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-              # 3. Securely isolate workspace and clean old data
+              # 3. Clean workspace allocation
               rm -rf /home/ubuntu/parish-os
               mkdir -p /home/ubuntu/parish-os
               cd /home/ubuntu/parish-os
 
-              # 4. Pull the public repository cleanly
+              # 4. Clone your public codebase directly into workspace root
               git clone https://github.com .
 
-              # 5. Fix permissions across the workspace
+              # 5. Fix workspace ownership privileges
               chown -R ubuntu:ubuntu /home/ubuntu/parish-os
 
-              # 6. Run the master compose setup directly from the repository root
-              docker compose up -d --build
-              EOF
+              # 6. CRITICAL AUTO-WAIT LOOP: 
+              # Pauses execution until Git has completely written the compose file to disk
+              while [ ! -f /home/ubuntu/parish-os/docker-compose.yml ]
+              do
+                sleep 2
+              done
 
+              # 7. Execute the build and run pipeline instantly once files exist
+              /usr/bin/docker compose -f /home/ubuntu/parish-os/docker-compose.yml up -d --build
+              EOF
   root_block_device {
     volume_size           = 8 # 8GB SSD is plenty for millions of rows in SQLite; stays under free-tier limits if applicable
     volume_type           = "gp3"
