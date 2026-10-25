@@ -114,44 +114,47 @@ resource "aws_instance" "parish_server" {
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.vps_sg.id]
   key_name               = aws_key_pair.deployer_key.key_name
-
   user_data = <<-EOF
-              #!/bin/bash
-              # 1. Install container engines and version control systems
-              apt-get update -y
-              apt-get install -y docker.io docker-compose git curl
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ubuntu
+            #!/bin/bash
+            # 1. Install prerequisites and setup official Docker Apt repository
+            apt-get update -y
+            apt-get install -y ca-certificates curl git
+            install -m 0755 -d /etc/apt/keyrings
+            curl -fsSL https://docker.com -o /etc/apt/keyrings/docker.asc
+            chmod a+r /etc/apt/keyrings/docker.asc
 
-              # 2. Native ARM64 Docker Compose engine installation
-              mkdir -p /usr/local/lib/docker/cli-plugins/
-              curl -SL https://github.com -o /usr/local/lib/docker/cli-plugins/docker-compose
-              chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://docker.com \
+              $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+              tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-              # 3. Clean workspace allocation
-              rm -rf /home/ubuntu/parish-os
-              mkdir -p /home/ubuntu/parish-os
-              cd /home/ubuntu/parish-os
+            # 2. Install official Docker Engine and modern Compose Plugin (ARM64 native via Apt)
+            apt-get update -y
+            apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-              # 4. Clone your public codebase directly into workspace root
-              git clone https://github.com/yakobos/parish .
+            # 3. Configure service and permissions
+            systemctl start docker
+            systemctl enable docker
+            usermod -aG docker ubuntu
 
-              # 5. Fix workspace ownership privileges
-              chown -R ubuntu:ubuntu /home/ubuntu/parish-os
+            # 4. Clean workspace allocation
+            rm -rf /home/ubuntu/parish-os
+            mkdir -p /home/ubuntu/parish-os
+            cd /home/ubuntu/parish-os
 
-              # 6. CRITICAL AUTO-WAIT LOOP: 
-              # Pauses execution until Git has completely written the compose file to disk
-              while [ ! -f /home/ubuntu/parish-os/docker-compose.yml ]
-              do
-                sleep 2
-              done
+            # 5. Clone public codebase into workspace root (Blocks synchronously until complete)
+            git clone https://github.com/yakobos/parish .
 
-              # 7. Execute the build and run pipeline instantly once files exist
-              /usr/bin/docker-compose -f /home/ubuntu/parish-os/docker-compose.yml build --no-cache
-              /usr/bin/docker-compose -f /home/ubuntu/parish-os/docker-compose.yml up -d
+            # 6. Fix workspace ownership privileges
+            chown -R ubuntu:ubuntu /home/ubuntu/parish-os
 
-              EOF
+            # 7. Execute the modern Docker Compose v2 build and run pipeline
+            # (Note the space instead of the hyphen, utilizing the official plugin engine)
+            docker compose -f /home/ubuntu/parish-os/docker-compose.yml build --no-cache
+            docker compose -f /home/ubuntu/parish-os/docker-compose.yml up -d
+
+            EOF
+
   root_block_device {
     volume_size           = 8 # 8GB SSD is plenty for millions of rows in SQLite; stays under free-tier limits if applicable
     volume_type           = "gp3"
