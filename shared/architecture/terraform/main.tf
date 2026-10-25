@@ -135,7 +135,7 @@ resource "aws_instance" "parish_server" {
               cd /home/ubuntu/parish-os
 
               # 4. Clone your public codebase directly into workspace root
-              git clone https://github.com .
+              git clone https://github.com/yakobos/parish .
 
               # 5. Fix workspace ownership privileges
               chown -R ubuntu:ubuntu /home/ubuntu/parish-os
