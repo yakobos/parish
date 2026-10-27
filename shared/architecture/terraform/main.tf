@@ -115,39 +115,9 @@ resource "aws_instance" "parish_server" {
   vpc_security_group_ids = [aws_security_group.vps_sg.id]
   key_name               = aws_key_pair.deployer_key.key_name
 
-  user_data = <<-EOF
-              #!/bin/bash
-              # 1. Fetch the official Docker production installation script
-              curl -fsSL https://docker.com -o get-docker.sh
-              sh get-docker.sh
-
-              # 2. Start engines and delegate system permissions
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ubuntu
-
-              # 3. Pull git source control tools
-              apt-get update && apt-get install -y git
-
-              # 4. Clean workspace allocation
-              rm -rf /home/ubuntu/parish-os
-              mkdir -p /home/ubuntu/parish-os
-              cd /home/ubuntu/parish-os
-
-              # 5. Clone the public codebase into the root context folder
-              git clone https://github.com/yakobos/parish .
-              chown -R ubuntu:ubuntu /home/ubuntu/parish-os
-
-              # 6. Safety Loop: Wait until Git has successfully flushed files to the disk
-              while [ ! -f /home/ubuntu/parish-os/docker-compose.yml ]
-              do
-                sleep 2
-              done
-
-              # 7. Zero-Touch Boot: Deploy container layout using modern engine specifications
-              docker compose up -d --build
-              EOF
-              EOF
+  user_data = templatefile("${path.module}/init.sh", {
+    repo_url = "https://github.com/yakobos/parish" 
+  })
 
 
   root_block_device {
