@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usher Scheduler — Sunday Rotation</title>
+<style>
+:root{--ink:#16213a;--ink2:#45516a;--muted:#788196;--paper:#f4efe5;--card:#fffdf9;--line:#e5ddcf;--line2:#d4c6ad;--gold:#b9872d;--goldsoft:#f6ead0;--blue:#24577d;--bluesoft:#e4eef5;--green:#236b51;--greensoft:#e2f1e8;--red:#a44132;--redsoft:#f8e8e3;--shadow:0 16px 40px rgba(32,40,58,.08);--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--serif:Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:var(--sans);min-height:100vh;background:radial-gradient(circle at 8% -10%,rgba(223,190,126,.28),transparent 34%),radial-gradient(circle at 100% 0%,rgba(36,87,125,.12),transparent 30%),linear-gradient(180deg,#f9f5ed,#eee7da)}
+button,select,input{font:inherit}button{cursor:pointer}
+.page{width:min(1460px,100%);margin:0 auto;padding:22px}
+.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.8fr);gap:26px;align-items:center;padding:32px 34px;border-radius:24px;color:#fffaf0;background:linear-gradient(120deg,rgba(185,135,45,.18),transparent 44%),linear-gradient(135deg,#17243e,#1a2b49 58%,#15304a);box-shadow:0 24px 60px rgba(22,33,58,.2)}
+.hero:before{content:"";position:absolute;width:360px;height:360px;right:-100px;top:-200px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 68px rgba(255,255,255,.025);pointer-events:none}
+.hero-copy,.hero-stats{position:relative;z-index:1}
+.kicker{display:inline-block;margin-bottom:11px;color:#e4c57d;font-size:11px;font-weight:800;letter-spacing:.2em}
+.hero h1{margin:0 0 10px;font-family:var(--serif);font-size:clamp(31px,4vw,52px);font-weight:600;line-height:1.04;letter-spacing:-.025em}
+.hero p{margin:0;max-width:740px;color:rgba(255,250,240,.78);font-size:14.5px;line-height:1.65}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat-card{padding:14px 15px;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:rgba(255,255,255,.065)}
+.stat-card strong{display:block;color:#fff;font-family:var(--serif);font-size:23px;font-weight:600;line-height:1.15}
+.stat-card span{display:block;margin-top:4px;color:rgba(255,250,240,.62);font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+main{padding-top:16px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.command{padding:18px 20px;margin-bottom:16px}
+.cmd-top{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px}
+.cmd-top h2,.ph h2{margin:0;font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.015em}
+.muted{color:var(--muted)}.cmd-top .muted{margin:3px 0 0;font-size:12.5px}
+.cmd-side{display:grid;gap:9px;justify-items:end}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid transparent;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:750;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{color:#fffaf0;background:linear-gradient(135deg,#1c4d70,#153f5d);box-shadow:0 8px 18px rgba(28,77,112,.2)}
+.btn.ghost{color:var(--ink2);border-color:var(--line2);background:#fff}
+.btn.gold{color:#3e2b08;background:linear-gradient(135deg,#e7c77d,#d8ac4f);box-shadow:0 6px 14px rgba(185,135,45,.18)}
+.btn.sm{padding:8px 12px;font-size:11.5px}
+.season{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.season label{color:var(--muted);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.season input[type=date]{width:174px;min-height:34px;padding:6px 9px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:8px;outline:none;font-size:12px;font-variant-numeric:tabular-nums}
+.season input[type=date]:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bluesoft)}
+.forms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line2)}
+.fb{display:grid;gap:8px;align-content:start}
+.ft{margin:0;color:var(--muted);font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.fr{display:grid;gap:8px;align-items:end}
+.fr.two{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+.fr.three{grid-template-columns:minmax(0,.8fr) minmax(0,.7fr) minmax(0,1.2fr) auto}
+.f{display:grid;gap:5px}
+.f label{color:var(--muted);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+input[type=text],select{width:100%;min-height:38px;padding:8px 10px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:9px;outline:none;font-size:12.5px}
+input[type=text]:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bluesoft)}
+.chk{display:flex;align-items:center;gap:7px;min-height:38px;padding:0 9px;background:#fff;border:1px solid var(--line2);border-radius:9px;font-size:11px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.chk input{width:14px;height:14px;accent-color:#24577d}
+.msg{min-height:14px;margin:0;font-size:11px;font-weight:650;line-height:1.45}
+.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+.hint{margin:0;color:var(--muted);font-size:10.5px;line-height:1.5}.hint b{color:var(--red)}
+.hint.err{color:var(--red);font-weight:700}
+.chips-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.rc{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;color:var(--ink2);background:#f8f5ee;border:1px solid var(--line);border-radius:999px;font-size:9.5px;font-weight:700;letter-spacing:.03em}
+.rc b{color:var(--blue)}.rc.skip b{color:var(--red)}.rc.fair{background:var(--greensoft);border-color:#c9e6d6}.rc.fair b{color:var(--green)}
+.rc.new{background:var(--goldsoft);border-color:#e8d3a4}.rc.new b{color:#76510e}
+</style>
+<style>
+.grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(352px,.82fr);gap:16px;align-items:start;margin-bottom:16px}
+.ph{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;padding:18px 20px 13px;border-bottom:1px solid var(--line)}
+.ph p{margin:3px 0 0;font-size:11.5px}
+.badges{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.mb{padding:4px 8px;color:var(--blue);background:var(--bluesoft);border-radius:999px;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.mb.good{color:var(--green);background:var(--greensoft)}.mb.bad{color:var(--red);background:var(--redsoft)}.mb.gold{color:#76510e;background:var(--goldsoft)}
+.ts{overflow:auto}.sched-scroll{max-height:560px}
+table{width:100%;border-collapse:collapse}
+th{position:sticky;top:0;z-index:2;padding:9px 11px;color:var(--muted);background:#fbf8f2;border-bottom:1px solid var(--line);font-size:8.5px;font-weight:800;letter-spacing:.13em;text-align:left;text-transform:uppercase;white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid #f0eae0;vertical-align:middle}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fcf8f0}
+.st{min-width:660px;font-size:12.5px}
+.st tr.seed{background:#fdfaf4}.st tr.manual{background:#fdf7e8}.st tr.unfilled{background:#fdf0ec}
+.wp{display:inline-grid;place-items:center;min-width:32px;height:26px;padding:0 6px;color:var(--ink);background:#f1ece2;border-radius:7px;font-size:11.5px;font-weight:800}
+.sd{color:var(--ink2);font-size:11px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sd.now{color:var(--blue)}
+.tg{color:var(--muted);font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.sc{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.stg{display:inline-block;min-width:37px;padding:3px 5px;border-radius:5px;font-size:7.5px;font-weight:850;letter-spacing:.1em;text-align:center;text-transform:uppercase}
+.stg.early{color:#76510e;background:var(--goldsoft)}.stg.late{color:#1d4f73;background:var(--bluesoft)}
+.nm{font-weight:750}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:7.5px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.pill.locked{color:var(--green);background:var(--greensoft)}.pill.unfilled{color:var(--red);background:var(--redsoft)}
+.rt{min-width:560px;font-size:11.5px}.rt td{padding:8px 9px}.rt th{padding:8px 9px}
+.pn{font-weight:800}.ps{margin-top:1px;color:var(--muted);font-size:8.5px;white-space:nowrap}
+.elig{display:inline-block;padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase}
+.elig.yes{color:var(--green);background:var(--greensoft)}.elig.no{color:var(--red);background:var(--redsoft)}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.mbtn{padding:4px 7px;color:var(--ink2);background:#fff;border:1px solid var(--line2);border-radius:6px;font-size:8.5px;font-weight:750}
+.mbtn:hover{border-color:var(--blue);color:var(--blue)}
+.rfoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;padding:10px 15px 14px;color:var(--muted);font-size:9.5px;border-top:1px solid var(--line)}
+.cyc{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 5px;border-radius:6px;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.cyc.z{color:#9d3b2c;background:#f9e6e0;box-shadow:inset 0 0 0 1px #eed4cb}
+.cyc.o{color:#1e4d66;background:#eef5f7}
+.cyc.m{color:#6f4810;background:#f7e7c4}
+.sat{margin-bottom:16px}
+.sat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;padding:16px 20px 18px}
+.sat-card{padding:13px 15px;background:#faf7f0;border:1px solid var(--line);border-radius:11px}
+.sat-card h3{margin:0 0 4px;font-size:11px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.sat-card p{margin:0 0 9px;font-size:10.5px;line-height:1.5;color:var(--muted)}
+.sat-nums{display:flex;flex-wrap:wrap;gap:6px}
+.sn{padding:4px 8px;background:#fff;border:1px solid var(--line2);border-radius:6px;font-size:9.5px;font-weight:750;color:var(--ink2);font-variant-numeric:tabular-nums}
+.sn b{color:var(--blue)}
+.sn.ok{color:var(--green);border-color:#c9e6d6;background:var(--greensoft)}
+.bars{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px}
+.ledger{margin-bottom:16px}
+.lt{min-width:630px;font-size:11.5px}.lt td{padding:8px 9px}.lt th{padding:8px 9px}
+.track{position:relative;display:block;height:6px;min-width:78px;background:#efe9dd;border-radius:99px;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;display:block;border-radius:99px;background:var(--green)}
+.track i.due{background:var(--gold)}.track i.over{background:var(--red)}
+.chip{display:inline-block;padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.chip.ok{color:var(--green);background:var(--greensoft)}.chip.cyc{color:var(--blue);background:var(--bluesoft)}
+.chip.due{color:#76510e;background:var(--goldsoft)}.chip.over{color:var(--red);background:var(--redsoft)}
+.lfoot{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;padding:10px 18px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:9.5px}
+.lfoot b{color:var(--ink)}
+.mx{margin-bottom:16px}.mx-scroll{padding:2px 14px 12px}
+.pm{font-size:10.5px}.pm th{text-align:center;padding:7px 4px}
+.pm th:first-child{left:0;z-index:3;min-width:72px;text-align:left}
+.pm td{padding:6px 4px;text-align:center;border-bottom-color:#f4eee4}
+.pm td:first-child{position:sticky;left:0;z-index:1;color:var(--ink);background:var(--card);font-weight:750;text-align:left}
+.pm .diag{color:#c9c1b2;background:#faf7f1}.pm .zero{color:#c5bdaf}
+.pm .one{color:#1e4d66;background:#eef5f7;font-weight:800}.pm .hot{color:#6f4810;background:#f7e7c4;font-weight:850}
+.mlegend{display:flex;flex-wrap:wrap;gap:12px;padding:0 20px 13px;color:var(--muted);font-size:9.5px}
+.ldot{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;vertical-align:-1px}
+.tr-panel{margin-bottom:16px}
+.trace{display:grid;gap:8px;padding:14px 18px 18px;max-height:580px;overflow:auto}
+.tn{padding:9px 11px;color:var(--ink2);background:#f9f6ef;border:1px dashed var(--line2);border-radius:9px;font-size:10.5px;line-height:1.55}
+.tn.man{background:var(--goldsoft);border-color:#e3c889}.tn.warn{background:var(--redsoft);border-color:#e8c9c0}
+.tn strong{color:var(--ink)}
+.tc{overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:10px}
+.tc[open]{border-color:#cdbd9e}
+.tc summary{display:grid;grid-template-columns:78px minmax(0,1fr) auto 12px;gap:9px;align-items:center;padding:9px 11px;cursor:pointer;list-style:none}
+.tc summary::-webkit-details-marker{display:none}
+.tc summary:after{content:"+";color:var(--muted);font-size:15px;line-height:1}
+.tc[open] summary:after{content:"\2013"}
+.tw{color:var(--muted);font-size:9.5px;font-weight:850;letter-spacing:.06em;white-space:nowrap}
+.tp{min-width:0;font-size:11.5px;font-weight:750}.tp small{color:var(--muted);font-size:7.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.sp{padding:3px 7px;color:var(--blue);background:var(--bluesoft);border-radius:999px;font-size:9.5px;font-weight:850;font-variant-numeric:tabular-nums}
+.tc.dl .sp{color:var(--red);background:var(--redsoft)}
+.td{padding:0 11px 11px 98px}.td p{margin:0 0 5px;font-size:9.5px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.pc{padding:3px 6px;color:#754d0d;background:#fbefd6;border:1px solid #f0ddb4;border-radius:5px;font-size:8.5px;font-weight:700}
+.pc.zero{color:var(--green);background:var(--greensoft);border-color:#c9e6d6}
+.pc.meta{color:var(--ink2);background:#f3efe6;border-color:#e3dccd}
+.empty{padding:24px;color:var(--muted);font-size:11.5px;text-align:center}
+footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;padding:6px 4px 18px;color:var(--muted);font-size:9.5px}
+@media(max-width:1080px){.hero{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.forms{grid-template-columns:1fr}.sched-scroll{max-height:480px}.cmd-side{justify-items:start}.season{justify-content:flex-start}}
+@media(max-width:720px){.page{padding:11px}.hero{padding:24px 20px;border-radius:18px}.fr.three,.fr.two{grid-template-columns:1fr 1fr}.fr.three .btn{grid-column:1/-1}.td{padding-left:11px}.command{padding:15px}.ph{padding:14px 14px 12px}.tc summary{grid-template-columns:70px minmax(0,1fr) auto 12px}}
+@media(max-width:430px){.hero-stats,.fr.three,.fr.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div class="hero-copy">
+      <span class="kicker">ONE SUNDAY AT A TIME · SATURATING COUNTERS</span>
+      <h1>Usher Team Scheduler</h1>
+      <p>Every week is a real Sunday, solved against the full ledger of Sundays before it. Workload fairness uses a saturating counter rather than a lifetime total, so a new usher steps into the rotation level with everyone else instead of owing catch-up shifts — and joining also resyncs the pairing ledger so nobody is left permanently out of step.</p>
+    </div>
+    <div class="hero-stats" id="heroStats"></div>
+  </header>
+
+  <main>
+    <section class="panel command">
+      <div class="cmd-top">
+        <div><h2>Controls</h2><p class="muted" id="cursorBadge"></p></div>
+        <div class="cmd-side">
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="generateBtn"></button>
+            <button type="button" class="btn ghost" id="recomputeBtn">Recompute plan</button>
+            <button type="button" class="btn ghost" id="resetBtn">Reset to seed</button>
+          </div>
+          <div class="season">
+            <label for="seasonStart">Week 1 Sunday</label>
+            <input type="date" id="seasonStart">
+            <span class="hint" id="seasonMsg"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="forms">
+        <div class="fb">
+          <p class="ft">Add usher</p>
+          <form class="fr two" id="addForm">
+            <div class="f"><label for="addName">Name</label><input type="text" id="addName" placeholder="Caleb" autocomplete="off"></div>
+            <button type="submit" class="btn gold sm">Add</button>
+          </form>
+          <label class="chk" for="addEarly"><input type="checkbox" id="addEarly" checked> Can work Early</label>
+          <p class="msg" id="addMsg"></p>
+          <p class="hint">Joins <b id="addJoinWeek"></b>. Their workload counter starts at zero like everyone else's, and the pairing ledger is reset for the whole team so no one is left behind on pair counts.</p>
+        </div>
+
+        <div class="fb">
+          <p class="ft">Manual adjustment</p>
+          <form class="fr three" id="swapForm">
+            <div class="f"><label for="swapWeek">Week</label><select id="swapWeek"></select></div>
+            <div class="f"><label for="swapShift">Shift</label><select id="swapShift"><option value="Early">Early</option><option value="Late">Late</option></select></div>
+            <div class="f"><label for="swapPerson">Person</label><select id="swapPerson"></select></div>
+            <button type="submit" class="btn gold sm">Swap</button>
+          </form>
+          <p class="hint" id="swapHint"></p>
+        </div>
+
+        <div class="fb">
+          <p class="ft">Vacation weeks</p>
+          <form class="fr three" id="vacForm">
+            <div class="f"><label for="vacPerson">Person</label><select id="vacPerson"></select></div>
+            <div class="f"><label for="vacWeeks">Weeks</label><input type="text" id="vacWeeks" placeholder="12, 13" autocomplete="off"></div>
+            <button type="submit" class="btn gold sm">Save</button>
+          </form>
+          <p class="msg" id="vacMsg"></p>
+          <p class="hint">Saving rewrites availability and replans every generated Sunday from the seed baseline.</p>
+        </div>
+      </div>
+
+      <div class="chips-strip">
+        <span class="rc fair"><b>Tier 1</b> saturating workload counter</span>
+        <span class="rc fair"><b>Tier 2</b> no shift in the last 2 weeks</span>
+        <span class="rc fair"><b>Tier 3</b> fewest prior pairings</span>
+        <span class="rc fair"><b>Tier 4</b> penalty score</span>
+        <span class="rc new"><b>Never</b> repeat last week's pair</span>
+        <span class="rc new"><b>Counter</b> −1 to all when everyone ≥ 1</span>
+        <span class="rc new"><b>On join</b> pairing ledger resyncs to zero</span>
+        <span class="rc"><b>+100</b> soft gap</span>
+        <span class="rc"><b>+20</b> per prior pairing</span>
+        <span class="rc"><b>+10</b> above group avg</span>
+        <span class="rc"><b>+5</b> shift over-index</span>
+        <span class="rc skip"><b>Off</b> in deadlock: gap + type</span>
+      </div>
+    </section>
+
+    <section class="panel sat">
+      <div class="ph">
+        <div><h2>Saturating counters</h2><p class="muted">Both counters roll over on the same rule: when every entry is at least one, subtract one from all of them.</p></div>
+        <div class="badges"><span class="mb" id="satWorkloadBadge"></span><span class="mb gold" id="satMatrixBadge"></span></div>
+      </div>
+      <div class="sat-grid">
+        <div class="sat-card">
+          <h3>Workload counter</h3>
+          <p>Each usher's share of the current rotation. It never accumulates debt, which is why a new usher is not favoured every week.</p>
+          <div class="sat-nums" id="satWorkloadNums"></div>
+          <div class="bars" id="satWorkloadBars"></div>
+        </div>
+        <div class="sat-card">
+          <h3>Pairing matrix</h3>
+          <p>Times each pair has worked together since the last rollover. A zero beats a two, every time.</p>
+          <div class="sat-nums" id="satMatrixNums"></div>
+          <div class="bars" id="satMatrixBars"></div>
+        </div>
+        <div class="sat-card">
+          <h3>Staying in sync</h3>
+          <p>Pair counts are relative, so adding an usher zeroes the whole ledger and the cycle restarts level. Nobody carries an unmatched row.</p>
+          <div class="sat-nums" id="satWhy"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="ph">
+          <div><h2>Master schedule</h2><p class="muted">Weeks 1–5 are fixed baseline. Each later week is generated individually against every Sunday before it.</p></div>
+          <span class="mb" id="seasonBadge">Sunday rotation</span>
+        </div>
+        <div class="ts sched-scroll">
+          <table class="st">
+            <thead><tr><th>Wk</th><th>Sunday</th><th>Early</th><th>Late</th><th>Source</th><th>Status</th><th></th></tr></thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">
+          <div><h2>Roster</h2><p class="muted">Cycle is the saturating counter that drives every decision.</p></div>
+          <span class="mb" id="rosterCount"></span>
+        </div>
+        <div class="ts">
+          <table class="rt">
+            <thead><tr><th>Usher</th><th>Early</th><th class="num">Cycle</th><th class="num">Total</th><th class="num">E</th><th class="num">L</th><th class="num">Last</th></tr></thead>
+            <tbody id="rosterBody"></tbody>
+          </table>
+        </div>
+        <div class="rfoot"><span id="rosterAvg"></span><span>Micha is late-only.</span></div>
+      </div>
+    </section>
+
+    <section class="panel ledger">
+      <div class="ph">
+        <div><h2>Rest ledger</h2><p class="muted">Sundays since each usher last served. A red bar means they have waited longer than a full rotation.</p></div>
+        <div class="badges"><span class="mb" id="ledgerBadge"></span><span class="mb gold" id="ledgerSpread"></span></div>
+      </div>
+      <div class="ts">
+        <table class="lt">
+          <thead><tr><th>Usher</th><th>Status</th><th>Idle</th><th style="min-width:104px">Wait</th><th class="num">Cycle</th><th class="num">Total</th></tr></thead>
+          <tbody id="ledgerBody"></tbody>
+        </table>
+      </div>
+      <div class="lfoot" id="ledgerFoot"></div>
+    </section>
+
+    <section class="panel mx">
+      <div class="ph">
+        <div><h2>Pairing matrix</h2><p class="muted">Symmetric. Once every pair has at least one count, every count drops by one. Adding an usher resyncs the whole ledger.</p></div>
+        <div class="badges"><span class="mb" id="matrixBadge"></span><span class="mb gold" id="matrixEpoch"></span></div>
+      </div>
+      <div class="mlegend">
+        <span><span class="ldot" style="background:#f7e7c4;border:1px solid #e9d29b"></span>Used twice or more</span>
+        <span><span class="ldot" style="background:#eef5f7;border:1px solid #d4e4e9"></span>Used once</span>
+        <span><span class="ldot" style="background:#faf7f1;border:1px solid #ece5d9"></span>Never paired</span>
+      </div>
+      <div class="ts mx-scroll" id="matrixWrap"></div>
+    </section>
+
+    <section class="panel tr-panel">
+      <div class="ph">
+        <div><h2>Decision trace</h2><p class="muted">Expand a Sunday to see each tier's value for the winning pair.</p></div>
+        <span class="mb">Auditable</span>
+      </div>
+      <div class="trace" id="traceList"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Week-by-week generation · seed weeks 1–5 fixed · every week bound to a Sunday</span>
+    <span>Console: <strong>UsherScheduler</strong> · <strong>apply_manual_swap()</strong> · <strong>addUsher()</strong></span>
+  </footer>
+</div>
+<script>
+(() => {
+'use strict';
+
+/* 1. Configuration */
+const SEED_LAST_WEEK = 5;
+const BASE_ROSTER = ['Yokky','Pante','Stev','Derri','Gosh','Etha','Johny','Micha','Jose','Tylee'];
+const LATE_ONLY_NAMES = new Set(['Micha','Michael']);
+const SEED_HISTORY = [
+  { week:1, early:'Yokky', late:'Pante' },
+  { week:2, early:'Stev',  late:'Derri' },
+  { week:3, early:'Gosh',  late:'Etha'  },
+  { week:4, early:'Johny', late:'Micha' },
+  { week:5, early:'Jose',  late:'Tylee' }
+];
+const W = { softGap:100, pair:20, workload:10, shiftType:5 };
+const RECENT_WINDOW = 2;
+
+/* Season calendar. Week 1 is a Sunday and every week is seven days later.
+   Dates are computed in UTC so they never drift with the local timezone. */
+const DAY_MS = 86400000;
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+let seasonStartMs = Date.UTC(2026, 8, 27);
+
+/* 2. State */
+let roster = {};
+let rosterOrder = [];
+let pairMatrix = {};
+let schedule = {};
+let cursor = 0;
+let workloadCycles = 0;
+let matrixCycles = 0;
+let seasonNote = '';
+let decisionTrace = [];
+
+const $ = (s) => document.querySelector(s);
+const els = {
+  heroStats:$('#heroStats'), cursorBadge:$('#cursorBadge'), generateBtn:$('#generateBtn'),
+  recomputeBtn:$('#recomputeBtn'), resetBtn:$('#resetBtn'),
+  seasonStart:$('#seasonStart'), seasonMsg:$('#seasonMsg'), seasonBadge:$('#seasonBadge'),
+  addForm:$('#addForm'), addName:$('#addName'), addEarly:$('#addEarly'), addMsg:$('#addMsg'),
+  addJoinWeek:$('#addJoinWeek'), swapForm:$('#swapForm'), swapWeek:$('#swapWeek'),
+  swapShift:$('#swapShift'), swapPerson:$('#swapPerson'), swapHint:$('#swapHint'),
+  vacForm:$('#vacForm'), vacPerson:$('#vacPerson'), vacWeeks:$('#vacWeeks'), vacMsg:$('#vacMsg'),
+  scheduleBody:$('#scheduleBody'), rosterBody:$('#rosterBody'), rosterCount:$('#rosterCount'),
+  rosterAvg:$('#rosterAvg'), ledgerBody:$('#ledgerBody'), ledgerBadge:$('#ledgerBadge'),
+  ledgerSpread:$('#ledgerSpread'), ledgerFoot:$('#ledgerFoot'), matrixWrap:$('#matrixWrap'),
+  matrixBadge:$('#matrixBadge'), matrixEpoch:$('#matrixEpoch'), traceList:$('#traceList'),
+  satWorkloadBadge:$('#satWorkloadBadge'), satMatrixBadge:$('#satMatrixBadge'),
+  satWorkloadNums:$('#satWorkloadNums'), satWorkloadBars:$('#satWorkloadBars'),
+  satMatrixNums:$('#satMatrixNums'), satMatrixBars:$('#satMatrixBars'), satWhy:$('#satWhy')
+};
+
+/* 3. Helpers */
+const weeksOf = () => Object.keys(schedule).map(Number).sort((a,b)=>a-b);
+const maxWeek = () => weeksOf().reduce((m,w)=>Math.max(m,w), 0);
+const pairCount = (a,b) => (pairMatrix[a] && typeof pairMatrix[a][b] === 'number') ? pairMatrix[a][b] : 0;
+const idxOf = (n) => rosterOrder.indexOf(n);
+const joinedBy = (week) => rosterOrder.filter((n) => roster[n].JoinedWeek <= week);
+
+/* A join implies a ledger resync. Deriving it from JoinedWeek rather than a
+   side-set keeps it reproducible: replay and forward generation both hit it. */
+const isResyncWeek = (week) => week > 1 && rosterOrder.some((n) => roster[n].JoinedWeek === week);
+const resyncCount = () => rosterOrder.filter((n) => roster[n].JoinedWeek > 1).length;
+
+function escapeHtml(v) {
+  return String(v).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
+}
+function parseWeeks(raw) {
+  if (!raw) return [];
+  return String(raw).split(/[,\s]+/).map(Number).filter((n)=>Number.isInteger(n) && n > 0);
+}
+function parseISODate(raw) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(raw || '').trim());
+  if (!m) return null;
+  const t = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return Number.isFinite(t) ? t : null;
+}
+function isoOf(ms) {
+  const d = new Date(ms);
+  const pad = (n) => String(n).padStart(2, '0');
+  return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
+}
+function weekMs(week) { return seasonStartMs + (week - 1) * 7 * DAY_MS; }
+function weekShort(week) {
+  const d = new Date(weekMs(week));
+  return DAYS[d.getUTCDay()] + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate();
+}
+function weekLong(week) {
+  const d = new Date(weekMs(week));
+  return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+}
+function isSunday(ms) { return new Date(ms).getUTCDay() === 0; }
+function snapToSunday(ms) { return ms - new Date(ms).getUTCDay() * DAY_MS; }
+function anchorWeek(p) { return p.LastWeekWorked > 0 ? p.LastWeekWorked : Math.max(0, p.JoinedWeek - 1); }
+function idleWeeks(p, week) { return Math.max(0, week - anchorWeek(p)); }
+function lifetimeSpread() {
+  if (!rosterOrder.length) return 0;
+  const t = rosterOrder.map((n)=>roster[n].TotalShiftsWorked);
+  return Math.max(...t) - Math.min(...t);
+}
+function cycleSpread() {
+  if (!rosterOrder.length) return 0;
+  const t = rosterOrder.map((n)=>roster[n].CycleShifts);
+  return Math.max(...t) - Math.min(...t);
+}
+function recentLoad(week) {
+  const map = {};
+  rosterOrder.forEach((n) => { map[n] = 0; });
+  for (let w = Math.max(1, week - RECENT_WINDOW); w < week; w += 1) {
+    const row = schedule[w];
+    if (!row) continue;
+    if (map[row.Early] !== undefined) map[row.Early] += 1;
+    if (map[row.Late] !== undefined) map[row.Late] += 1;
+  }
+  return map;
+}
+
+/* 4. Roster, matrix, replay */
+function createProfile(name, opts) {
+  const o = opts || {};
+  return {
+    Name: name,
+    CanWorkEarly: o.canWorkEarly === undefined ? !LATE_ONLY_NAMES.has(name) : !!o.canWorkEarly,
+    TotalShiftsWorked: 0,
+    EarlyShiftsWorked: 0,
+    LateShiftsWorked: 0,
+    LastWeekWorked: 0,
+    UnavailableWeeks: new Set(o.unavailable || []),
+    JoinedWeek: o.joinedWeek || 1,
+    CycleShifts: 0
+  };
+}
+function clearPairMatrix() {
+  const next = {};
+  rosterOrder.forEach((a) => {
+    next[a] = {};
+    rosterOrder.forEach((b) => { next[a][b] = 0; });
+  });
+  pairMatrix = next;
+}
+function resetRosterMetrics() {
+  rosterOrder.forEach((n) => {
+    const p = roster[n];
+    p.TotalShiftsWorked = 0;
+    p.EarlyShiftsWorked = 0;
+    p.LateShiftsWorked = 0;
+    p.LastWeekWorked = 0;
+    p.CycleShifts = 0;
+  });
+}
+function cycleAverageFor(week) {
+  const men = joinedBy(week);
+  if (!men.length) return 0;
+  return men.reduce((s,n)=>s + roster[n].CycleShifts, 0) / men.length;
+}
+
+/* 5. The two saturating counters.
+   Rule, applied literally: if every entry is at least one, subtract one from all. */
+function pairsCovered(week) {
+  const men = joinedBy(week);
+  if (men.length < 2) return false;
+  for (let i = 0; i < men.length; i += 1) {
+    for (let j = i + 1; j < men.length; j += 1) {
+      if (pairCount(men[i], men[j]) < 1) return false;
+    }
+  }
+  return true;
+}
+function rollMatrix(week) {
+  const men = joinedBy(week);
+  let n = 0, guard = 0;
+  while (pairsCovered(week) && guard < 500) {
+    for (let i = 0; i < men.length; i += 1) {
+      for (let j = i + 1; j < men.length; j += 1) {
+        pairMatrix[men[i]][men[j]] -= 1;
+        pairMatrix[men[j]][men[i]] -= 1;
+      }
+    }
+    n += 1; guard += 1;
+  }
+  matrixCycles += n;
+  return n;
+}
+function rollWorkload(week) {
+  const men = joinedBy(week);
+  let n = 0, guard = 0;
+  while (men.length && men.every((x) => roster[x].CycleShifts >= 1) && guard < 500) {
+    men.forEach((x) => { roster[x].CycleShifts -= 1; });
+    n += 1; guard += 1;
+  }
+  workloadCycles += n;
+  return n;
+}
+function distinctPairsUsed() {
+  let used = 0;
+  for (let i = 0; i < rosterOrder.length; i += 1) {
+    for (let j = i + 1; j < rosterOrder.length; j += 1) {
+      if (pairCount(rosterOrder[i], rosterOrder[j]) > 0) used += 1;
+    }
+  }
+  return used;
+}
+function applyShiftStats(week, earlyName, lateName) {
+  const early = roster[earlyName];
+  const late = roster[lateName];
+  if (!early || !late) return;
+  early.TotalShiftsWorked += 1;
+  early.EarlyShiftsWorked += 1;
+  early.CycleShifts += 1;
+  early.LastWeekWorked = week;
+  late.TotalShiftsWorked += 1;
+  late.LateShiftsWorked += 1;
+  late.CycleShifts += 1;
+  late.LastWeekWorked = week;
+  if (earlyName !== lateName) {
+    pairMatrix[earlyName][lateName] = (pairMatrix[earlyName][lateName] || 0) + 1;
+    pairMatrix[lateName][earlyName] = (pairMatrix[lateName][earlyName] || 0) + 1;
+  }
+}
+function rebuildAll() {
+  resetRosterMetrics();
+  clearPairMatrix();
+  workloadCycles = 0;
+  matrixCycles = 0;
+  weeksOf().forEach((week) => {
+    if (isResyncWeek(week)) clearPairMatrix();
+    const row = schedule[week];
+    if (!row || !roster[row.Early] || !roster[row.Late]) return;
+    applyShiftStats(week, row.Early, row.Late);
+    rollMatrix(week);
+    rollWorkload(week);
+  });
+}
+function primeSeed() {
+  roster = {};
+  rosterOrder = [];
+  schedule = {};
+  workloadCycles = 0;
+  matrixCycles = 0;
+  seasonNote = '';
+  decisionTrace = [];
+  BASE_ROSTER.forEach((n) => {
+    roster[n] = createProfile(n, { joinedWeek: 1 });
+    rosterOrder.push(n);
+  });
+  clearPairMatrix();
+  SEED_HISTORY.forEach((e) => {
+    schedule[e.week] = { Early:e.early, Late:e.late, Status:'LOCKED', Source:'seed' };
+    applyShiftStats(e.week, e.early, e.late);
+    rollMatrix(e.week);
+    rollWorkload(e.week);
+  });
+  cursor = SEED_LAST_WEEK;
+  decisionTrace.push({
+    type:'note',
+    message:'Primed weeks 1\u20135 in order (' + weekShort(1) + ' through ' + weekShort(5) + '). Each of the ten men starts on exactly one shift, so the workload counter opens level and the pairing matrix opens with five used pairs.'
+  });
+}
+
+/* 6. Hard filters */
+function previousPair(week) {
+  const row = schedule[week - 1];
+  if (!row || !roster[row.Early] || !roster[row.Late]) return null;
+  return [row.Early, row.Late].sort().join('|');
+}
+function buildCandidates(week, opts) {
+  const o = opts || {};
+  const ignoreGap = !!o.ignoreGap;
+  const prev = o.allowRepeat ? null : previousPair(week);
+  const out = [];
+  for (let i = 0; i < rosterOrder.length; i += 1) {
+    for (let j = i + 1; j < rosterOrder.length; j += 1) {
+      const a = roster[rosterOrder[i]];
+      const b = roster[rosterOrder[j]];
+      if (!a || !b) continue;
+      if (a.JoinedWeek > week || b.JoinedWeek > week) continue;
+      if (a.UnavailableWeeks.has(week) || b.UnavailableWeeks.has(week)) continue;
+      if (!ignoreGap && (a.LastWeekWorked === week - 1 || b.LastWeekWorked === week - 1)) continue;
+      if (!a.CanWorkEarly && !b.CanWorkEarly) continue;
+      if (prev && [a.Name, b.Name].sort().join('|') === prev) continue;
+      out.push([a, b]);
+    }
+  }
+  return out;
+}
+
+/* 7. Role assignment */
+function assignRoles(a, b) {
+  if (a.CanWorkEarly && !b.CanWorkEarly) return { early:a, late:b, note:b.Name + ' is late-only.' };
+  if (!a.CanWorkEarly && b.CanWorkEarly) return { early:b, late:a, note:a.Name + ' is late-only.' };
+
+  /* Balance EARLY SLOTS, not raw lifetime counts. Comparing raw counts made a
+     new usher permanently the man with "fewer Early shifts" - he starts at 0
+     while veterans sit near 36 - so he took Early for years and his Late count
+     never caught up. Early-minus-Late is tenure-neutral: a newcomer starts at
+     the roster mean, and since each week adds one Early and one Late, the
+     surplus sums to zero and everyone drifts back level. */
+  const surplusA = a.EarlyShiftsWorked - a.LateShiftsWorked;
+  const surplusB = b.EarlyShiftsWorked - b.LateShiftsWorked;
+
+  let early;
+  let note;
+
+  if (surplusA !== surplusB) {
+    early = surplusA < surplusB ? a : b;
+    note = 'Early goes to the man with the smaller Early-minus-Late surplus.';
+  } else if (a.CycleShifts !== b.CycleShifts) {
+    early = a.CycleShifts < b.CycleShifts ? a : b;
+    note = 'Surplus tied; the smaller workload cycle takes Early.';
+  } else {
+    early = idxOf(a.Name) <= idxOf(b.Name) ? a : b;
+    note = 'Full role tie; roster order decides.';
+  }
+
+  return { early, late: early === a ? b : a, note };
+}
+
+/* 8. Penalty scoring (spec weights) */
+function evaluate(a, b, week, deadlock) {
+  const roles = assignRoles(a, b);
+  const avg = cycleAverageFor(week);
+  const parts = [];
+  let score = 0;
+  const add = (label, points) => {
+    if (points <= 0) return;
+    score += points;
+    parts.push({ label, points });
+  };
+  if (!deadlock) {
+    [a, b].forEach((p) => {
+      if (p.LastWeekWorked > 0 && week - p.LastWeekWorked <= 2) {
+        add(p.Name + ': ' + (week - p.LastWeekWorked) + '-week soft gap', W.softGap);
+      }
+    });
+  }
+  const together = pairCount(a.Name, b.Name);
+  if (together > 0) add('Pair history x' + together, together * W.pair);
+  [a, b].forEach((p) => {
+    const excess = Math.max(0, p.CycleShifts - avg);
+    if (excess > 0) add(p.Name + ': +' + excess.toFixed(2) + ' over cycle avg', excess * W.workload);
+  });
+  if (!deadlock) {
+    if (roles.early.EarlyShiftsWorked > roles.early.LateShiftsWorked) {
+      add(roles.early.Name + ': Early over-index', W.shiftType);
+    }
+    if (roles.late.LateShiftsWorked > roles.late.EarlyShiftsWorked) {
+      add(roles.late.Name + ': Late over-index', W.shiftType);
+    }
+  }
+  return { score, parts, early:roles.early, late:roles.late, roleNote:roles.note, together };
+}
+
+/* 9. Cycle projection.
+   With N men and two slots, the last Sunday of a rotation is forced to be
+   whoever is left over. Projection replays the rest of the rotation on a copy
+   of the state and sums the pair counts it is forced to reuse, so the leftover
+   pair is chosen deliberately instead of tripping over arithmetic. The fairness
+   tiers are identical inside the copy - nothing is relaxed. */
+function projectCost(startWeek, nameA, nameB) {
+  /* Freeze the projection pool to the men who are on the team THIS week.
+     Looking ahead into weeks where a not-yet-joined usher already exists would
+     let a future joiner retroactively change the decision for the week before
+     they arrived, so the live plan and a replayed plan could disagree. */
+  const team = rosterOrder.filter((n) => roster[n].JoinedWeek <= startWeek);
+  const ep = {}, last = {}, pm = {}, hist = [];
+  team.forEach((n) => { ep[n] = roster[n].CycleShifts; last[n] = roster[n].LastWeekWorked; });
+  for (let w = Math.max(1, startWeek - RECENT_WINDOW); w < startWeek; w += 1) {
+    const r = schedule[w];
+    if (r && r.Early !== '\u2014') hist.push([r.Early, r.Late]);
+  }
+  team.forEach((a) => {
+    pm[a] = {};
+    team.forEach((b) => { pm[a][b] = pairCount(a, b); });
+  });
+  const K = (a,b) => [a,b].sort().join('|');
+  const inHist = (n) => hist.some((p) => p[0] === n || p[1] === n) ? 1 : 0;
+
+  let cost = pm[nameA][nameB];
+  ep[nameA] += 1; ep[nameB] += 1;
+  last[nameA] = startWeek; last[nameB] = startWeek;
+  pm[nameA][nameB] += 1; pm[nameB][nameA] += 1;
+  hist.push([nameA, nameB]);
+  if (hist.length > RECENT_WINDOW) hist.shift();
+
+  let prevKey = K(nameA, nameB), week = startWeek, guard = 0;
+  while (guard < 10) {
+    if (team.length >= 2 && team.every((n) => ep[n] >= 1)) break;
+    week += 1; guard += 1;
+    const pool0 = [];
+    for (let i = 0; i < team.length; i += 1) {
+      for (let j = i + 1; j < team.length; j += 1) {
+        const a = team[i], b = team[j];
+        if (roster[a].UnavailableWeeks.has(week) || roster[b].UnavailableWeeks.has(week)) continue;
+        if (last[a] === week - 1 || last[b] === week - 1) continue;
+        if (!roster[a].CanWorkEarly && !roster[b].CanWorkEarly) continue;
+        const k = K(a, b);
+        if (k === prevKey) continue;
+        pool0.push([a, b, k]);
+      }
+    }
+    if (!pool0.length) break;
+
+    const s1 = (x) => ep[x[0]] + ep[x[1]];
+    const m1 = Math.min(...pool0.map(s1));
+    let pool = pool0.filter((x) => s1(x) === m1);
+    const mx = (x) => Math.max(ep[x[0]], ep[x[1]]);
+    const m1b = Math.min(...pool.map(mx));
+    pool = pool.filter((x) => mx(x) === m1b);
+
+    const s2 = (x) => inHist(x[0]) + inHist(x[1]);
+    const m2 = Math.min(...pool.map(s2));
+    pool = pool.filter((x) => s2(x) === m2);
+
+    const m3 = Math.min(...pool.map((x) => pm[x[0]][x[1]]));
+    pool = pool.filter((x) => pm[x[0]][x[1]] === m3);
+
+    let pick = null;
+    pool.forEach((x) => {
+      const tie = idxOf(x[0]) + idxOf(x[1]);
+      if (!pick || tie < pick.tie) pick = { a:x[0], b:x[1], k:x[2], tie };
+    });
+
+    cost += pm[pick.a][pick.b];
+    ep[pick.a] += 1; ep[pick.b] += 1;
+    last[pick.a] = week; last[pick.b] = week;
+    pm[pick.a][pick.b] += 1; pm[pick.b][pick.a] += 1;
+    hist.push([pick.a, pick.b]);
+    if (hist.length > RECENT_WINDOW) hist.shift();
+    prevKey = pick.k;
+  }
+  return cost;
+}
+
+/* 10. Solve one Sunday */
+function chooseWeek(week) {
+  /* New usher this week? Start the pairing ledger level for everybody. */
+  if (isResyncWeek(week)) clearPairMatrix();
+
+  let mode = 'normal';
+  let cands = buildCandidates(week, {});
+  if (!cands.length) { mode = 'deadlock'; cands = buildCandidates(week, { ignoreGap:true }); }
+  if (!cands.length) { mode = 'deadlock-repeat'; cands = buildCandidates(week, { ignoreGap:true, allowRepeat:true }); }
+
+  if (!cands.length) {
+    schedule[week] = { Early:'\u2014', Late:'\u2014', Status:'UNFILLED', Source:'generated' };
+    decisionTrace.push({
+      type:'assign', week, mode:'none', deadlock:true, candidateCount:0, score:0, parts:[],
+      early:'\u2014', late:'\u2014', pair:0, cycles:[0,0], recent:0, proj:0, poolSize:0,
+      afterTier1:0, afterTier2:0, afterTier3:0, rest:0,
+      roleNote:'No pair passed availability and capability, even with the gap and repeat rules dropped.'
+    });
+    return;
+  }
+
+  const deadlock = mode !== 'normal';
+
+  /* Tier 1: saturating workload counter. Never relaxed. */
+  const s1 = ([a,b]) => a.CycleShifts + b.CycleShifts;
+  const min1 = Math.min(...cands.map(s1));
+  let pool = cands.filter(([a,b]) => s1([a,b]) === min1);
+  const mx = ([a,b]) => Math.max(a.CycleShifts, b.CycleShifts);
+  const min1b = Math.min(...pool.map(mx));
+  pool = pool.filter(([a,b]) => mx([a,b]) === min1b);
+  const afterTier1 = pool.length;
+
+  /* Tier 2: anti-clustering. */
+  const recent = recentLoad(week);
+  const s2 = ([a,b]) => recent[a.Name] + recent[b.Name];
+  const min2 = Math.min(...pool.map(s2));
+  pool = pool.filter(([a,b]) => s2([a,b]) === min2);
+  const afterTier2 = pool.length;
+
+  /* Tier 3: variety. */
+  const projCache = {};
+  pool.forEach(([a,b]) => { projCache[a.Name + '|' + b.Name] = projectCost(week, a.Name, b.Name); });
+  const pOf = ([a,b]) => projCache[a.Name + '|' + b.Name];
+  const min3 = Math.min(...pool.map(pOf));
+  pool = pool.filter(([a,b]) => pOf([a,b]) === min3);
+  const min3b = Math.min(...pool.map(([a,b]) => pairCount(a.Name, b.Name)));
+  pool = pool.filter(([a,b]) => pairCount(a.Name, b.Name) === min3b);
+  const afterTier3 = pool.length;
+
+  /* Tier 4: penalties, then longest rest, then roster order. */
+  let best = null;
+  pool.forEach(([a, b]) => {
+    const ev = evaluate(a, b, week, deadlock);
+    const rest = idleWeeks(a, week) + idleWeeks(b, week);
+    const tie = idxOf(a.Name) + idxOf(b.Name);
+    if (!best) { best = { ...ev, a, b, rest, tie }; return; }
+    if (ev.score < best.score - 1e-9) { best = { ...ev, a, b, rest, tie }; return; }
+    if (Math.abs(ev.score - best.score) <= 1e-9) {
+      if (rest > best.rest) { best = { ...ev, a, b, rest, tie }; return; }
+      if (rest === best.rest && tie < best.tie) best = { ...ev, a, b, rest, tie };
+    }
+  });
+
+  const cyclesBefore = [best.early.CycleShifts, best.late.CycleShifts];
+  schedule[week] = { Early:best.early.Name, Late:best.late.Name, Status:'LOCKED', Source:'generated' };
+  applyShiftStats(week, best.early.Name, best.late.Name);
+  rollMatrix(week);
+  rollWorkload(week);
+
+  decisionTrace.push({
+    type:'assign', week, mode, deadlock, candidateCount:cands.length,
+    score:best.score, parts:best.parts, early:best.early.Name, late:best.late.Name,
+    pair:best.together, cycles:cyclesBefore, recent:min2, proj:min3,
+    afterTier1, afterTier2, afterTier3, poolSize:pool.length,
+    rest:best.rest, roleNote:best.roleNote
+  });
+}
+function generateNextWeek() {
+  const week = cursor + 1;
+  chooseWeek(week);
+  cursor = week;
+  return week;
+}
+function regenerateForward(horizon) {
+  let guard = 0;
+  while (cursor < horizon && guard < 3000) { generateNextWeek(); guard += 1; }
+}
+function purgeAfter(week) {
+  weeksOf().forEach((w) => { if (w > week) delete schedule[w]; });
+}
+
+/* 11. Manual modification: overwrite, purge downstream, replay, refill. */
+function apply_manual_swap(week, shift, person) {
+  const w = Number(week);
+  if (!Number.isInteger(w) || !schedule[w]) return { ok:false, error:'No such week.' };
+  if (shift !== 'Early' && shift !== 'Late') return { ok:false, error:'Unknown shift.' };
+  if (!roster[person]) return { ok:false, error:person + ' is not on the roster.' };
+  if (roster[person].JoinedWeek > w) return { ok:false, error:person + ' has not joined by ' + weekShort(w) + '.' };
+
+  const row = schedule[w];
+  const other = shift === 'Early' ? 'Late' : 'Early';
+  if (row[other] === person) return { ok:false, error:person + ' already holds ' + other + ' that Sunday.' };
+
+  const horizon = Math.max(cursor, maxWeek());
+  row[shift] = person;
+  row.Status = 'LOCKED';
+  row.Source = 'manual';
+
+  purgeAfter(w);
+  decisionTrace = [];
+  rebuildAll();
+  decisionTrace.push({
+    type:'manual',
+    message:'Week ' + w + ' (' + weekShort(w) + ') ' + shift + ' set to ' + person + '. Every planned Sunday after it was deleted, then all counters, the saturating workload levels and the pairing matrix were zeroed and replayed from ' + weekShort(1) + '.'
+  });
+
+  cursor = w;
+  regenerateForward(horizon);
+  render();
+  return { ok:true };
+}
+
+/* 12. Add an usher.
+   Two things happen so the newcomer is never permanently out of step:
+   their workload counter starts at zero like everyone else's, and the whole
+   pairing ledger is reset. Pair counts are a relative saturating counter - only
+   differences between cells ever matter - so zeroing loses no scheduling
+   information. Leaving the old counts in place would strand the newcomer's row
+   at zero while every existing pair climbed, and matrix rollover would stall
+   until they had met all the others. */
+function addUsher(name, canWorkEarly, unavailableWeeks) {
+  const clean = String(name || '').trim();
+  if (!clean) return { ok:false, error:'Enter a name.' };
+  if (roster[clean]) return { ok:false, error:clean + ' is already on the roster.' };
+
+  roster[clean] = createProfile(clean, {
+    canWorkEarly: canWorkEarly !== false,
+    unavailable: unavailableWeeks || [],
+    joinedWeek: cursor + 1
+  });
+  rosterOrder.push(clean);
+
+  clearPairMatrix();
+
+  decisionTrace.push({
+    type:'note',
+    message: clean + ' joined from ' + weekLong(cursor + 1) + ' (week ' + (cursor + 1) + '). ' +
+      'The pairing matrix was reset to zero for all ' + rosterOrder.length +
+      ' ushers so nobody carries an unmatched ledger, and their workload counter starts at zero like everyone else\'s.'
+  });
+
+  render();
+  return { ok:true, joinedWeek: roster[clean].JoinedWeek, resynced:true };
+}
+
+/* 13. Vacation weeks */
+function setVacation(name, weeks) {
+  if (!roster[name]) return { ok:false, error:'Unknown usher.' };
+  roster[name].UnavailableWeeks = new Set(weeks || []);
+  const horizon = Math.max(cursor, maxWeek());
+  const keepUntil = Math.min(SEED_LAST_WEEK, roster[name].JoinedWeek - 1);
+  purgeAfter(keepUntil);
+  decisionTrace = [];
+  rebuildAll();
+  decisionTrace.push({
+    type:'note',
+    message:'Availability for ' + name + ' updated to ' + ((weeks || []).length ? weeks.join(', ') : 'none') +
+      '. Every generated Sunday was discarded and rebuilt from the replayed history.'
+  });
+  cursor = keepUntil;
+  regenerateForward(horizon);
+  render();
+  return { ok:true };
+}
+
+/* 14. Recompute the whole generated plan */
+function recomputePlan() {
+  const horizon = Math.max(cursor, maxWeek());
+  purgeAfter(SEED_LAST_WEEK);
+  decisionTrace = [];
+  rebuildAll();
+  decisionTrace.push({
+    type:'note',
+    message:'Recomputed: generated Sundays were discarded, history was replayed from the seed baseline, and the plan was rebuilt one Sunday at a time.'
+  });
+  cursor = SEED_LAST_WEEK;
+  regenerateForward(horizon);
+  render();
+}
+
+/* 15. Recompute from a specific week */
+function recomputeFrom(week) {
+  const w = Number(week);
+  if (!Number.isInteger(w) || w < SEED_LAST_WEEK) return false;
+  const horizon = Math.max(cursor, maxWeek());
+  purgeAfter(w);
+  decisionTrace = [];
+  rebuildAll();
+  decisionTrace.push({ type:'note', message:'Recomputed every Sunday after ' + weekShort(w) + '.' });
+  cursor = w;
+  regenerateForward(horizon);
+  render();
+  return true;
+}
+
+/* 16. Move the calendar anchor */
+function setSeasonStart(iso) {
+  const ms = parseISODate(iso);
+  if (ms === null) return false;
+  seasonStartMs = snapToSunday(ms);
+  seasonNote = ms === seasonStartMs
+    ? 'Week 1 is ' + weekShort(1) + ' \u00b7 every week is the next Sunday.'
+    : 'Snapped back to ' + weekShort(1) + ' so week 1 lands on a Sunday.';
+  render();
+  return true;
+}
+
+/* 17. Rendering */
+function render() {
+  renderHero();
+  renderSaturation();
+  renderSchedule();
+  renderRoster();
+  renderLedger();
+  renderMatrix();
+  renderTrace();
+  renderControls();
+}
+function cycClass(v) { return v === 0 ? 'z' : (v === 1 ? 'o' : 'm'); }
+function n0(v) { return typeof v === 'number' ? v : 0; }
+
+function renderHero() {
+  els.heroStats.innerHTML = `
+    <div class="stat-card"><strong>${weeksOf().length}</strong><span>sundays mapped</span></div>
+    <div class="stat-card"><strong>${weekShort(cursor + 1)}</strong><span>next sunday \u00b7 wk ${cursor + 1}</span></div>
+    <div class="stat-card"><strong>${cycleSpread()}</strong><span>cycle spread</span></div>
+    <div class="stat-card"><strong>${workloadCycles}</strong><span>counter rollovers</span></div>`;
+}
+
+function renderSaturation() {
+  const men = rosterOrder;
+  const vals = men.map((n) => roster[n].CycleShifts);
+  const atZero = vals.filter((v) => v === 0).length;
+  const min = vals.length ? Math.min(...vals) : 0;
+  const max = vals.length ? Math.max(...vals) : 0;
+
+  els.satWorkloadBadge.textContent = '\u22121 rule active when every usher \u2265 1';
+  els.satMatrixBadge.textContent = matrixCycles + ' rollover' + (matrixCycles === 1 ? '' : 's');
+  els.satWorkloadNums.innerHTML = `
+    <span class="sn">level <b>${min}\u2013${max}</b></span>
+    <span class="sn">at zero <b>${atZero}</b>/${vals.length}</span>
+    <span class="sn">rollovers <b>${workloadCycles}</b></span>
+    <span class="sn ${cycleSpread() <= 1 ? 'ok' : ''}">spread <b>${cycleSpread()}</b></span>`;
+  els.satWorkloadBars.innerHTML = men.map((n) => {
+    const v = roster[n].CycleShifts;
+    return `<span class="cyc ${cycClass(v)}" title="${escapeHtml(n)}: cycle ${v}">${v}</span>`;
+  }).join('');
+
+  const used = distinctPairsUsed();
+  const total = (men.length * (men.length - 1)) / 2;
+  const counts = [];
+  for (let i = 0; i < men.length; i += 1) {
+    for (let j = i + 1; j < men.length; j += 1) counts.push(pairCount(men[i], men[j]));
+  }
+  const zeros = counts.filter((v) => v === 0).length;
+  const maxPair = counts.length ? Math.max(...counts) : 0;
+  els.satMatrixNums.innerHTML = `
+    <span class="sn">covered <b>${used}</b>/${total}</span>
+    <span class="sn">still zero <b>${zeros}</b></span>
+    <span class="sn">highest cell <b>${maxPair}</b></span>
+    <span class="sn">rollovers <b>${matrixCycles}</b></span>
+    <span class="sn">resyncs <b>${resyncCount()}</b></span>`;
+  els.satMatrixBars.innerHTML = counts.map((v) =>
+    `<span class="cyc ${v === 0 ? 'z' : (v === 1 ? 'o' : 'm')}" title="pair count ${v}">${v}</span>`).join('');
+
+  const added = men.filter((n) => roster[n].JoinedWeek > 1);
+  const newMan = added.length ? added[added.length - 1] : null;
+  els.satWhy.innerHTML = newMan
+    ? `<span class="sn">${escapeHtml(newMan)} joined <b>${escapeHtml(weekShort(roster[newMan].JoinedWeek))}</b></span>
+       <span class="sn">rows level <b>${min === 0 ? 'yes' : 'yes, all at ' + min + '+'}</b></span>
+       <span class="sn">resyncs <b>${resyncCount()}</b></span>`
+    : `<span class="sn">no usher added yet</span>
+       <span class="sn">all rows level</span>
+       <span class="sn ok">no catch-up debt</span>`;
+}
+
+function renderSchedule() {
+  const weeks = weeksOf();
+  if (!weeks.length) {
+    els.scheduleBody.innerHTML = '<tr><td colspan="7" class="empty">No schedule data.</td></tr>';
+    return;
+  }
+  els.scheduleBody.innerHTML = weeks.map((week) => {
+    const row = schedule[week];
+    const seed = row.Source === 'seed';
+    const cls = seed ? 'seed' : (row.Status === 'UNFILLED' ? 'unfilled' : (row.Source === 'manual' ? 'manual' : ''));
+    const status = row.Status === 'UNFILLED' ? 'unfilled' : 'locked';
+    const label = seed ? 'Seed' : (row.Source === 'manual' ? 'Manual' : 'Auto');
+    const isNext = week === cursor + 1;
+    return `
+      <tr class="${cls}">
+        <td><span class="wp">${week}</span></td>
+        <td><span class="sd ${isNext ? 'now' : ''}" title="${escapeHtml(weekLong(week))}">${escapeHtml(weekShort(week))}</span></td>
+        <td><div class="sc"><span class="stg early">Early</span><span class="nm">${escapeHtml(row.Early)}</span></div></td>
+        <td><div class="sc"><span class="stg late">Late</span><span class="nm">${escapeHtml(row.Late)}</span></div></td>
+        <td><span class="tg">${label}</span></td>
+        <td><span class="pill ${status}">${escapeHtml(row.Status)}</span></td>
+        <td>${week > SEED_LAST_WEEK ? `<button type="button" class="mbtn" data-week="${week}">Recalc</button>` : ''}</td>
+      </tr>`;
+  }).join('');
+}
+
+function renderRoster() {
+  els.rosterCount.textContent = rosterOrder.length + ' men';
+  els.rosterBody.innerHTML = rosterOrder.map((name) => {
+    const p = roster[name];
+    const vac = p.UnavailableWeeks.size ? 'Off: ' + [...p.UnavailableWeeks].sort((a,b)=>a-b).join(', ') : 'No vacation';
+    const sub = p.JoinedWeek > 1 ? vac + ' \u00b7 joined ' + weekShort(p.JoinedWeek) : vac;
+    return `
+      <tr>
+        <td><div class="pn">${escapeHtml(name)}</div><div class="ps">${escapeHtml(sub)}</div></td>
+        <td><span class="elig ${p.CanWorkEarly ? 'yes' : 'no'}">${p.CanWorkEarly ? 'Yes' : 'Late'}</span></td>
+        <td class="num"><span class="cyc ${cycClass(p.CycleShifts)}">${p.CycleShifts}</span></td>
+        <td class="num">${p.TotalShiftsWorked}</td>
+        <td class="num">${p.EarlyShiftsWorked}</td>
+        <td class="num">${p.LateShiftsWorked}</td>
+        <td class="num">${p.LastWeekWorked || '\u2014'}</td>
+      </tr>`;
+  }).join('');
+  els.rosterAvg.textContent = 'Cycle spread ' + cycleSpread() + ' \u00b7 lifetime spread ' + lifetimeSpread();
+}
+
+function renderLedger() {
+  const rotation = rosterOrder.length / 2 || 1;
+  const maxIdle = Math.max(1, Math.ceil(rotation) + 1);
+  let overdue = 0;
+  els.ledgerBody.innerHTML = rosterOrder.map((name) => {
+    const p = roster[name];
+    const idle = idleWeeks(p, cursor);
+    let chip = 'ok', label = 'Served', bar = '';
+    if (idle >= Math.ceil(rotation) + 1) { chip = 'over'; label = 'Overdue'; bar = 'over'; overdue += 1; }
+    else if (idle >= Math.ceil(rotation)) { chip = 'due'; label = 'Due'; bar = 'due'; }
+    else if (idle >= 1) { chip = 'cyc'; label = 'In cycle'; bar = ''; }
+    const pct = Math.min(100, Math.round((idle / maxIdle) * 100));
+    return `
+      <tr>
+        <td><span class="pn">${escapeHtml(name)}</span></td>
+        <td><span class="chip ${chip}">${label}</span></td>
+        <td class="num">${idle}</td>
+        <td><span class="track"><i class="${bar}" style="width:${pct}%"></i></span></td>
+        <td class="num"><span class="cyc ${cycClass(p.CycleShifts)}">${p.CycleShifts}</span></td>
+        <td class="num">${p.TotalShiftsWorked}</td>
+      </tr>`;
+  }).join('');
+  els.ledgerBadge.textContent = overdue ? overdue + ' overdue' : 'None overdue';
+  els.ledgerBadge.className = 'mb ' + (overdue ? 'bad' : 'good');
+  els.ledgerSpread.textContent = 'Spread ' + cycleSpread();
+  els.ledgerFoot.innerHTML =
+    '<span>Fair share with ' + rosterOrder.length + ' men is one Sunday every <b>' + rotation.toFixed(1) + ' weeks</b>.</span>' +
+    '<span>Longest current wait: <b>' + Math.max(0, ...rosterOrder.map((n) => idleWeeks(roster[n], cursor))) + ' weeks</b>.</span>';
+}
+
+function renderMatrix() {
+  if (!rosterOrder.length) { els.matrixWrap.innerHTML = '<div class="empty">No roster.</div>'; return; }
+  const head = rosterOrder.map((n) => `<th title="${escapeHtml(n)}">${escapeHtml(n)}</th>`).join('');
+  const body = rosterOrder.map((r) => {
+    const cells = rosterOrder.map((c) => {
+      if (r === c) return '<td class="diag">\u2014</td>';
+      const v = pairCount(r, c);
+      const cls = v >= 2 ? 'hot' : (v === 1 ? 'one' : 'zero');
+      return `<td class="${cls}" title="${escapeHtml(r)} x ${escapeHtml(c)}: ${v}">${v || '\u00b7'}</td>`;
+    }).join('');
+    return `<tr><td>${escapeHtml(r)}</td>${cells}</tr>`;
+  }).join('');
+  els.matrixWrap.innerHTML = `<table class="pm"><thead><tr><th>Usher</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  const total = (rosterOrder.length * (rosterOrder.length - 1)) / 2;
+  els.matrixBadge.textContent = distinctPairsUsed() + '/' + total + ' pairs used';
+  els.matrixEpoch.textContent = 'Rolled ' + matrixCycles + 'x \u00b7 ' + resyncCount() + ' resync' + (resyncCount() === 1 ? '' : 's');
+}
+
+function renderTrace() {
+  if (!decisionTrace.length) { els.traceList.innerHTML = '<div class="empty">No decisions yet.</div>'; return; }
+  els.traceList.innerHTML = decisionTrace.map((e) => {
+    if (e.type === 'note') return `<div class="tn">${escapeHtml(e.message)}</div>`;
+    if (e.type === 'manual') return `<div class="tn man"><strong>Manual swap.</strong> ${escapeHtml(e.message)}</div>`;
+    if (e.type !== 'assign') return '';
+
+    const chips = e.parts.length
+      ? e.parts.map((p) => `<span class="pc">${escapeHtml(p.label)} +${p.points.toFixed(p.points % 1 === 0 ? 0 : 2)}</span>`).join('')
+      : '<span class="pc zero">No penalties paid</span>';
+    const meta = [
+      `<span class="pc meta">cycle ${n0(e.cycles[0])}+${n0(e.cycles[1])}</span>`,
+      `<span class="pc meta">recent ${n0(e.recent)}</span>`,
+      `<span class="pc meta">projection ${n0(e.proj)}</span>`,
+      `<span class="pc meta">pair x${n0(e.pair)}</span>`,
+      `<span class="pc meta">tier1 ${n0(e.afterTier1)} \u2192 t2 ${n0(e.afterTier2)} \u2192 t3 ${n0(e.afterTier3)}</span>`,
+      `<span class="pc meta">${n0(e.candidateCount)} candidates</span>`
+    ].join('');
+    const modeTag = e.mode === 'normal' ? 'normal filters'
+      : (e.mode === 'deadlock' ? 'DEADLOCK: gap rule dropped'
+      : (e.mode === 'deadlock-repeat' ? 'DEADLOCK: repeat forced' : 'no candidates'));
+    const note = [modeTag, e.roleNote].filter(Boolean).join(' \u00b7 ');
+    return `
+      <details class="tc ${e.deadlock ? 'dl' : ''}">
+        <summary>
+          <span class="tw">Wk ${e.week} \u00b7 ${escapeHtml(weekShort(e.week))}</span>
+          <span class="tp">${escapeHtml(e.early)} <small>Early</small> \u00b7 ${escapeHtml(e.late)} <small>Late</small></span>
+          <span class="sp">${e.early === '\u2014' ? 'UNFILLED' : e.score.toFixed(2)}</span>
+        </summary>
+        <div class="td">
+          <p>${escapeHtml(note)}</p>
+          <div class="chips">${meta}</div>
+          <div class="chips">${chips}</div>
+        </div>
+      </details>`;
+  }).join('');
+}
+
+function renderControls() {
+  els.generateBtn.textContent = 'Generate ' + weekShort(cursor + 1);
+  els.cursorBadge.textContent = 'Through week ' + cursor + ' (' + weekShort(cursor) + ') \u00b7 next is week ' + (cursor + 1) + ', ' + weekLong(cursor + 1);
+  els.addJoinWeek.textContent = weekShort(cursor + 1) + ' (week ' + (cursor + 1) + ')';
+  els.seasonBadge.textContent = 'Wk 1 \u00b7 ' + weekShort(1);
+
+  const input = els.seasonStart;
+  if (document.activeElement !== input) input.value = isoOf(seasonStartMs);
+  els.seasonMsg.textContent = seasonNote || ('Week 1 is ' + weekShort(1) + ' \u00b7 every week is the next Sunday.');
+  els.seasonMsg.className = 'hint';
+  seasonNote = '';
+
+  const weeks = weeksOf();
+  const keepWeek = Number(els.swapWeek.value);
+  const pickWeek = weeks.includes(keepWeek) ? keepWeek : (weeks.includes(cursor) ? cursor : weeks[weeks.length - 1]);
+  els.swapWeek.innerHTML = weeks.map((w) =>
+    `<option value="${w}" ${w === pickWeek ? 'selected' : ''}>Wk ${w} \u00b7 ${escapeHtml(weekShort(w))}</option>`).join('');
+  refreshSwapPeople();
+
+  const keepPerson = els.vacPerson.value;
+  els.vacPerson.innerHTML = rosterOrder.map((n) => {
+    const p = roster[n];
+    const tag = p.UnavailableWeeks.size ? ' (' + [...p.UnavailableWeeks].sort((a,b)=>a-b).join(',') + ')' : '';
+    return `<option value="${escapeHtml(n)}" ${n === keepPerson ? 'selected' : ''}>${escapeHtml(n)}${tag}</option>`;
+  }).join('');
+  const sel = els.vacPerson.value;
+  if (sel && roster[sel] && document.activeElement !== els.vacWeeks) {
+    els.vacWeeks.value = [...roster[sel].UnavailableWeeks].sort((a,b)=>a-b).join(', ');
+  }
+}
+
+function refreshSwapPeople() {
+  const week = Number(els.swapWeek.value);
+  const shift = els.swapShift.value;
+  const row = schedule[week];
+  if (!row) { els.swapPerson.innerHTML = ''; els.swapHint.textContent = ''; return; }
+  const other = shift === 'Early' ? 'Late' : 'Early';
+  const blocked = row[other];
+  const pool = rosterOrder.filter((n) => roster[n].JoinedWeek <= week);
+  const keep = els.swapPerson.value;
+  let pick = pool.includes(keep) && keep !== blocked ? keep : null;
+  if (!pick && pool.includes(row[shift]) && row[shift] !== blocked) pick = row[shift];
+  if (!pick) pick = pool.find((n) => n !== blocked) || pool[0] || '';
+
+  els.swapPerson.innerHTML = pool.map((n) =>
+    `<option value="${escapeHtml(n)}" ${n === blocked ? 'disabled' : ''} ${n === pick ? 'selected' : ''}>${escapeHtml(n)}${n === blocked ? ' (on ' + other + ')' : ''}</option>`).join('');
+
+  els.swapHint.textContent = week <= SEED_LAST_WEEK
+    ? 'Week ' + week + ' is ' + weekShort(week) + '. Seed weeks are baseline history, so swapping one replans from week 6 onward.'
+    : 'Week ' + week + ' is ' + weekShort(week) + '. Swapping deletes every planned Sunday after it, replays the whole history, and rebuilds forward.';
+}
+
+/* 18. Events */
+function bind() {
+  els.generateBtn.addEventListener('click', () => { generateNextWeek(); render(); });
+  els.recomputeBtn.addEventListener('click', () => {
+    if (window.confirm('Discard all generated Sundays and rebuild the plan from weeks 1-5?')) recomputePlan();
+  });
+  els.resetBtn.addEventListener('click', () => {
+    if (!window.confirm('Reset to the seed and clear all added ushers?')) return;
+    primeSeed();
+    generateNextWeek();
+    render();
+  });
+
+  els.seasonStart.addEventListener('change', () => {
+    const ms = parseISODate(els.seasonStart.value);
+    if (ms === null) {
+      els.seasonMsg.textContent = 'Enter a valid date.';
+      els.seasonMsg.className = 'hint err';
+      els.seasonStart.value = isoOf(seasonStartMs);
+      return;
+    }
+    const snapped = snapToSunday(ms);
+    seasonStartMs = snapped;
+    seasonNote = snapped === ms
+      ? 'Week 1 is ' + weekShort(1) + ' \u00b7 every week is the next Sunday.'
+      : 'Snapped back to ' + weekShort(1) + ' so week 1 lands on a Sunday.';
+    render();
+  });
+
+  els.addForm.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const nm = els.addName.value.trim();
+    const res = addUsher(nm, els.addEarly.checked, []);
+    els.addMsg.textContent = res.ok
+      ? (nm + ' joins ' + weekShort(res.joinedWeek) + ' at cycle 0, and the pairing ledger was resynced for all ' + rosterOrder.length + ' ushers.')
+      : res.error;
+    els.addMsg.className = 'msg ' + (res.ok ? 'ok' : 'err');
+    if (res.ok) els.addName.value = '';
+  });
+
+  els.swapWeek.addEventListener('change', refreshSwapPeople);
+  els.swapShift.addEventListener('change', refreshSwapPeople);
+  els.swapForm.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const res = apply_manual_swap(els.swapWeek.value, els.swapShift.value, els.swapPerson.value);
+    if (!res.ok) window.alert(res.error);
+  });
+
+  els.vacForm.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const res = setVacation(els.vacPerson.value, parseWeeks(els.vacWeeks.value));
+    els.vacMsg.textContent = res.ok ? 'Availability saved and plan rebuilt.' : res.error;
+    els.vacMsg.className = 'msg ' + (res.ok ? 'ok' : 'err');
+  });
+  els.vacPerson.addEventListener('change', () => {
+    const n = els.vacPerson.value;
+    if (roster[n]) els.vacWeeks.value = [...roster[n].UnavailableWeeks].sort((a,b)=>a-b).join(', ');
+  });
+
+  els.scheduleBody.addEventListener('click', (ev) => {
+    const btn = ev.target && ev.target.closest ? ev.target.closest('button[data-week]') : null;
+    if (!btn) return;
+    recomputeFrom(btn.getAttribute('data-week'));
+  });
+}
+
+function boot() {
+  primeSeed();
+  generateNextWeek();
+  bind();
+  render();
+}
+
+boot();
+
+window.apply_manual_swap = apply_manual_swap;
+window.addUsher = addUsher;
+window.UsherScheduler = {
+  get roster() { return roster; },
+  get rosterOrder() { return rosterOrder; },
+  get pairMatrix() { return pairMatrix; },
+  get schedule() { return schedule; },
+  get cursor() { return cursor; },
+  get workloadCycles() { return workloadCycles; },
+  get matrixCycles() { return matrixCycles; },
+  get matrixResyncs() { return resyncCount(); },
+  get seasonStart() { return seasonStartMs; },
+  get trace() { return decisionTrace; },
+  generateNextWeek,
+  generateWeeks(n) { for (let i = 0; i < (n || 1); i += 1) generateNextWeek(); render(); return cursor; },
+  recomputePlan,
+  recomputeFrom,
+  apply_manual_swap,
+  addUsher,
+  setVacation,
+  setSeasonStart,
+  helpers: { pairCount, cycleSpread, lifetimeSpread, distinctPairsUsed, pairsCovered, idleWeeks, weeksOf, recentLoad, projectCost, buildCandidates, assignRoles, rollWorkload, rollMatrix, weekShort, weekLong, weekMs, isoOf, parseISODate, isSunday }
+};
+})();
+</script>
+</body>
+</html>
